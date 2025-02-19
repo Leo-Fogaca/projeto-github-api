@@ -4,6 +4,18 @@ document.getElementById('btn-search').addEventListener('click', () => {
     getUserProfile(userName)
 })
 
+// Conseguir fazer a requisição somente apertando enter após digitar o usuário
+
+document.getElementById('input-search').addEventListener('keyup', (e) => {
+    let userName = e.target.value
+    let key = e.which || e.keyCode
+    let enterPressed = key === 13
+
+    if (enterPressed) {
+        getUserProfile(userName)
+    }
+})
+
 //Fazer uma requisição pra API do github pra pegar os dados do usuário
 async function user(userName) {
     const response = await fetch(`https://api.github.com/users/${userName}`)
@@ -19,6 +31,31 @@ function getUserProfile(userName) {
                             <h1>${userData.name ?? 'Não possui nome cadastrado 😥'}</h1>
                             <p>${userData.bio ?? 'Não possui bio cadastrada 😥'}</p>
                         </div>`
-        document.querySelector('.profile-data').innerHTML = userInfo             
+        document.querySelector('.profile-data').innerHTML = userInfo
+    })
+    getUserRepositories(userName)
+}
+
+// Pegar os repositórios do usuário
+
+async function repos(userName) {
+    const response = await fetch(`https://api.github.com/users/${userName}/repos`)
+    return response.json()
+}
+
+// Mostrar todos repositórios no profile-data
+
+function getUserRepositories(userName) {
+    repos(userName).then(reposData => {
+        let repositoriesItens = ""
+        reposData.forEach(repo => {
+            repositoriesItens += `<li><a href="${repo.html_url}">${repo.name}</a></li>`
+        })
+
+        document.querySelector('.profile-data').innerHTML +=
+        `<div class="repositories section">
+            <h2>Repositorios</h2>
+            <ul>${repositoriesItens}</ul>
+        </div>`
     })
 }
